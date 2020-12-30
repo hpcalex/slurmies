@@ -1,0 +1,3 @@
+#!/bin/sh
+
+sacctmins "g.$(groups | cut -d' ' -f1)" gres/gpu

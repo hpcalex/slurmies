@@ -1,0 +1,23 @@
+#!/bin/sh
+
+# Usage: sacctmins <acct> <resc>
+
+# Reference for Slurm commands:
+#
+# https://slurm.schedmd.com/sshare.html
+
+# A previous revision used sreport and sacctmgr, respectively.
+
+share_info=$(sshare -lnpA "$1" | head -n 1)
+
+# Usage (u) and capacity (c).
+u=$(echo "$share_info" | cut -d \| -f  5)
+c=$(echo "$share_info" | cut -d \| -f 10 | sed -n "s,.*\<$2\>=\([1-9][0-9]*\).*,\1,;Tx;p;:x")
+
+u=$((u / 60))  # Quotient is floored.
+
+if [ "$#" -ne 2 ] || [ -z "$c" ]; then
+  exit 1
+fi
+
+printf "$1 $2 : %d of %d mins (%d of %d h) %d%%\n" "$u" "$c" "$((u / 60))" "$((c / 60))" "$((100 * u / c))"
